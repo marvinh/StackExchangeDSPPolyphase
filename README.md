@@ -1,4 +1,6 @@
-Fast dirty driver code for testing it will break but was for 256 sample input longer samples may break it 
+Fast dirty driver code for testing might break, but tried to prevent obvious.
+
+Change the file names to your folder paths.
 
 I was selecting phase index incorrectly and might have not properly built my filter bank
 
