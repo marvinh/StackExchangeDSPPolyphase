@@ -70,9 +70,9 @@ int main(int argc, const char * argv[]) {
        return 0;
    }
 
-    for(int n = 0; n < totalPCMFrameCount; n++) {
-        printf("%.6f\n",pSampleData[n]);
-    }
+    // for(int n = 0; n < totalPCMFrameCount; n++) {
+    //     printf("%.6f\n",pSampleData[n]);
+    // }
     
     //
     
