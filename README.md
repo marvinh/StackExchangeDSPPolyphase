@@ -1,3 +1,5 @@
+Fast dirty driver code for testing it will break but was for 256 sample input longer samples may break it 
+
 I was selecting phase index incorrectly and might have not properly built my filter bank
 
 <img width="411" height="185" alt="Screenshot 2026-01-17 at 11 54 42 AM" src="https://github.com/user-attachments/assets/44a63ed6-b52d-4d7b-a850-6fab521bc6c9" />
