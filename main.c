@@ -42,14 +42,16 @@ void convertSampleRate(float* x, float* y, float srcRatio, uint32_t nInputSample
             {
             y1 += SRC_FIR_coefs[iFIR++] * x[(i--+nInputSamples)%nInputSamples];
             }
-        
-        y[n] = y0 + linearInterpCoef*(y1-y0);
-        
+            
+            y[n] = y0 + linearInterpCoef*(y1-y0);
+            
+    
         precisionIndex += increment;
     }
 }
 
-float outputBuffer[1<<19]={0};
+#define OUT_BUFFER_SIZE 262144
+float outputBuffer[OUT_BUFFER_SIZE]={0};
 
 int main(int argc, const char * argv[]) {
 
@@ -58,9 +60,9 @@ int main(int argc, const char * argv[]) {
     unsigned int channels;
     unsigned int sampleRate;
    drwav_uint64 totalPCMFrameCount;
-    fopen("saw-256.wav", "r");
     
-   float* pSampleData = drwav_open_file_and_read_pcm_frames_f32("/full/project/path/saw-256.wav", &channels, &sampleRate, &totalPCMFrameCount, NULL);
+    
+   float* pSampleData = drwav_open_file_and_read_pcm_frames_f32("/Users/marvinharootoonyan/Desktop/StackExchangePolyPhase/StackExchangePolyPhase/saw-256.wav", &channels, &sampleRate, &totalPCMFrameCount, NULL);
     
    if (pSampleData == NULL) {
        // Error opening and reading WAV file.
@@ -76,16 +78,30 @@ int main(int argc, const char * argv[]) {
     
     
     
-    float srcRatio = 8.0;
+    float srcRatio = 16.0;
     uint32_t nInputSamples = (uint32_t)totalPCMFrameCount;
     uint32_t nOutputSamples = (uint32_t)floor((double)(nInputSamples-(SRC_FIR_LENGTH-1))*(srcRatio));
     int transpose = 0;
     float * walker = outputBuffer;
    
-    for(int n =1<<19; n > 0; n-=nOutputSamples){
-        convertSampleRate(pSampleData, walker, srcRatio, (uint32_t)(nInputSamples));
-        walker = (walker+nOutputSamples);
-        uint32_t nOutputSamples = (uint32_t)floor((double)(nInputSamples-(SRC_FIR_LENGTH-1))*(srcRatio));
+    
+    int currentLength = 0;
+    
+    for(int n =OUT_BUFFER_SIZE; n > 0 && walker != NULL; n-=nOutputSamples){
+        nOutputSamples = (uint32_t)floor((double)(nInputSamples-(SRC_FIR_LENGTH-1))*(srcRatio));
+        if(currentLength + nOutputSamples < OUT_BUFFER_SIZE){
+            convertSampleRate(pSampleData, walker, srcRatio, (uint32_t)(nInputSamples));
+            walker = (walker+nOutputSamples);
+            if(srcRatio <= 1.0f) {
+                srcRatio *= 0.999; //pitch up
+            }else{
+                srcRatio -= 0.25f; //pitch down
+            }
+            srcRatio = fmaxf(srcRatio, 0.25); // we might loop for ever for safety;
+        }else{
+            break;
+        }
+        currentLength += nOutputSamples;
     }
     
     
@@ -98,10 +114,10 @@ int main(int argc, const char * argv[]) {
     format.bitsPerSample = 32;
     drwav wav;
     float t = 0;
-    drwav_init_file_write(&wav, "/full/project/path/saw_interpolated.wav", &format, NULL);
+    drwav_init_file_write(&wav, "/Users/marvinharootoonyan/Desktop/StackExchangePolyPhase/StackExchangePolyPhase/saw_interpolated.wav", &format, NULL);
 
     //generate_sine_wave(outputBuffer, 1<<19, 1, 44100.0, 110.0, &t);
-    drwav_uint64 framesWritten = drwav_write_pcm_frames(&wav, 1<<19, outputBuffer);
+    drwav_uint64 framesWritten = drwav_write_pcm_frames(&wav, OUT_BUFFER_SIZE, outputBuffer);
     
     printf("%d\n",framesWritten);
 
