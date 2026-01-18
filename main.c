@@ -50,7 +50,7 @@ void convertSampleRate(float* x, float* y, float srcRatio, uint32_t nInputSample
     }
 }
 
-#define OUT_BUFFER_SIZE 262144
+#define OUT_BUFFER_SIZE 524288
 float outputBuffer[OUT_BUFFER_SIZE]={0};
 
 int main(int argc, const char * argv[]) {
@@ -70,11 +70,16 @@ int main(int argc, const char * argv[]) {
        return 0;
    }
 
+<<<<<<< HEAD
     // for(int n = 0; n < totalPCMFrameCount; n++) {
     //     printf("%.6f\n",pSampleData[n]);
     // }
     
     //
+=======
+
+ 
+>>>>>>> 619df8b (slide transpose)
     
     
     
@@ -92,12 +97,10 @@ int main(int argc, const char * argv[]) {
         if(currentLength + nOutputSamples < OUT_BUFFER_SIZE){
             convertSampleRate(pSampleData, walker, srcRatio, (uint32_t)(nInputSamples));
             walker = (walker+nOutputSamples);
-            if(srcRatio <= 1.0f) {
-                srcRatio *= 0.999; //pitch up
-            }else{
-                srcRatio -= 0.25f; //pitch down
-            }
-            srcRatio = fmaxf(srcRatio, 0.25); // we might loop for ever for safety;
+            
+            srcRatio *= 0.991; //transpose to slide through pitch down -> up 
+            
+            srcRatio = fmaxf(srcRatio, 0.06125); // we might loop for ever for safety;
         }else{
             break;
         }
