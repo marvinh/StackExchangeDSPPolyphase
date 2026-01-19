@@ -50,7 +50,7 @@ void convertSampleRate(float* x, float* y, float srcRatio, uint32_t nInputSample
     }
 }
 
-#define OUT_BUFFER_SIZE 524288
+#define OUT_BUFFER_SIZE 44100*8
 float outputBuffer[OUT_BUFFER_SIZE]={0};
 
 int main(int argc, const char * argv[]) {
@@ -74,29 +74,29 @@ int main(int argc, const char * argv[]) {
  
     
     
+    //These params are for demo purposes assuming 44.1khz input wavs:
     
-    float srcRatio = 16.0;
+    float srcRatio = 1.0f/2.4f; // 8.0f pitches DOWN by factor of 8
+                                // 1.0f/8.0f pitches UP by factor of 8;
+                                // so try both or any normal value you desire
+    
+  
+    
     uint32_t nInputSamples = (uint32_t)totalPCMFrameCount;
     uint32_t nOutputSamples = (uint32_t)floor((double)(nInputSamples-(SRC_FIR_LENGTH-1))*(srcRatio));
     int transpose = 0;
-    float * walker = outputBuffer;
+    uint32_t currentLength = 0;
    
     
-    int currentLength = 0;
     
-    for(int n =OUT_BUFFER_SIZE; n > 0 && walker != NULL; n-=nOutputSamples){
-        nOutputSamples = (uint32_t)floor((double)(nInputSamples-(SRC_FIR_LENGTH-1))*(srcRatio));
-        if(currentLength + nOutputSamples < OUT_BUFFER_SIZE){
-            convertSampleRate(pSampleData, walker, srcRatio, (uint32_t)(nInputSamples));
-            walker = (walker+nOutputSamples);
-            
-            srcRatio *= 0.991; //transpose to slide through pitch down -> up 
-            
-            srcRatio = fmaxf(srcRatio, 0.06125); // we might loop for ever for safety;
-        }else{
-            break;
-        }
+    while(currentLength + nOutputSamples < OUT_BUFFER_SIZE ){
+        
+        convertSampleRate(pSampleData, (outputBuffer+currentLength), srcRatio, (uint32_t)(nInputSamples));
+        
         currentLength += nOutputSamples;
+        
+        nOutputSamples = (uint32_t)floor((double)(nInputSamples-(SRC_FIR_LENGTH-1))*(srcRatio));
+        
     }
     
     
