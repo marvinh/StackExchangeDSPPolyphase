@@ -2,7 +2,9 @@ Example Usage:
 
 
 float srcRatio = 8.0 will pitch down by factor of 8 
+
 float srcRatio = 1.0/8 will pitch UP by factor of 8 
+
 Try different values and remember to change the file names to your folder paths.
 
 
